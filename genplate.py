@@ -205,7 +205,7 @@ class GenPlate:
 
 G = GenPlate("./font/platech.ttf",'./font/platechar.ttf',"./NoPlates")
 
-# G.genBatch(10000,2,range(31,65),"./plate_train",(272,72))
+#G.genBatch(500000,2,range(31,65),"./plate_train",(272,72))
 G.genBatch(1000,2,range(31,65),"./plate_test",(272,72))
 
 

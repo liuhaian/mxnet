@@ -49,7 +49,7 @@ def getnet():
 
 def TestRecognizeOne(img):
     img = cv2.resize(img,(120,30))
-    cv2.imshow("img",img);
+    #cv2.imshow("img",img);
 
     print img.shape
     img = np.swapaxes(img,0,2)
@@ -82,3 +82,4 @@ def TestRecognizeOne(img):
 
 if __name__ == '__main__':
     TestRecognizeOne(cv2.imread("./plate/01.jpg"))
+    #TestRecognizeOne(cv2.imread("/home/liuhaian/ocr/testfile/plate2.png"))

@@ -9,7 +9,16 @@ import numpy as np
 import cv2, random
 from io import BytesIO
 from genplate import *
+import glob
+import re
 
+
+indexu= {u"京": 0, u"沪": 1, u"津": 2, u"渝": 3, u"冀": 4, u"晋": 5, u"蒙": 6, u"辽": 7, u"吉": 8, u"黑": 9, u"苏": 10, u"浙": 11, u"皖": 12,
+         u"闽": 13, u"赣": 14, u"鲁": 15, u"豫": 16, u"鄂": 17, u"湘": 18, u"粤": 19, u"桂": 20, u"琼": 21, u"川": 22, u"贵": 23, u"云": 24,
+         u"藏": 25, u"陕": 26, u"甘": 27, u"青": 28, u"宁": 29, u"新": 30,"0": 31, "1": 32, "2": 33, "3": 34, "4": 35, "5": 36,
+         "6": 37, "7": 38, "8": 39, "9": 40, "A": 41, "B": 42, "C": 43, "D": 44, "E": 45, "F": 46, "G": 47, "H": 48,
+         "J": 49, "K": 50, "L": 51, "M": 52, "N": 53, "P": 54, "Q": 55, "R": 56, "S": 57, "T": 58, "U": 59, "V": 60,
+         "W": 61, "X": 62, "Y": 63, "Z": 64};
 
 class OCRBatch(object):
     def __init__(self, data_names, data, label_names, label):
@@ -45,10 +54,29 @@ def gen_rand():
     return name,label
 
 
+	
+def gen_rand_getImg():
+    name = "";
+    label= [];
+    
+    nPref=rand_range(0,1000)
+    strPref=str(nPref).zfill(4)
+    strFilename=glob.glob('plate_train/'+strPref+'.*.jpg')
+    img = cv2.imread(strFilename[0],-1)
+    
+    name=''
+    m = re.search('\.(.+?)\.jpg', strFilename[0])
+    if m:
+        name = m.group(1)
+    
+    for c in name.decode('utf-8'):
+        label.append(indexu[c])
+
+    return name,label,img
 
 def gen_sample(genplate, width, height):
-    num,label = gen_rand()
-    img = genplate.generate(num)
+    num,label,img = gen_rand_getImg()
+    #img = genplate.generate(num)
     img = cv2.resize(img, (width, height))
     img = np.multiply(img, 1/255.0)
     img = img.transpose(2, 0, 1)
@@ -138,8 +166,9 @@ def Accuracy(label, pred):
 
 
 def train():
+    print("start trainning")
     network = get_ocrnet()
-    devs = [mx.gpu(i) for i in range(1)]
+#    devs = [mx.gpu(i) for i in range(1)]
     model = mx.model.FeedForward(
                                  symbol = network,
                                  num_epoch = 1,
@@ -148,9 +177,9 @@ def train():
                                  initializer = mx.init.Xavier(factor_type="in", magnitude=2.34),
                                  momentum = 0.9)
     batch_size = 8
-    data_train = OCRIter(500000, batch_size, 7, 30, 120)
-    data_test = OCRIter(1000, batch_size,7, 30, 120)
-
+    data_train = OCRIter(5000, batch_size, 7, 30, 120)
+    data_test = OCRIter(50, batch_size,7, 30, 120)
+    print("start logging")
     import logging
     head = '%(asctime)-15s %(message)s'
     logging.basicConfig(level=logging.DEBUG, format=head)
